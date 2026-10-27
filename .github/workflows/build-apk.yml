@@ -1,0 +1,36 @@
+
+name: Build JARVIS Mobile APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project archive
+        run: |
+          unzip -o jarvis-mobile-with-apk-workflow.zip -d source
+          cp -a source/. .
+          rm -rf source
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-mobile-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
